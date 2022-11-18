@@ -1,7 +1,7 @@
 import numpy as np
 import heapq
 # TODO insert detailed description of Strategy One here
-class StrategyOne:
+class Strategy:
     # Should store which player the strategy is applying for use in checking board positions
     # Also stores an adj_mx of the game board (value of the distance is the cost to travel between nodes)
 
@@ -71,12 +71,6 @@ class StrategyOne:
             if self.adj_mx[node1][node2] > 0 and node1 != node2 and (int(ownership[node2]) == self.player or int(ownership[node2]) == -1):
                 neighbors.append(node2)
         return neighbors
-
-    def in_heap(self, heap, node):
-        for distance, n in heap:
-            if node == n:
-                return True
-        return False
 
     def get_goal_node(self, ownership, distances):
         index_of_minimum_unexplored = -1

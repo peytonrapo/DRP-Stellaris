@@ -1,10 +1,12 @@
 import numpy as np
-import strategy_one
+import strategy_shortest_dist
+import strategy_random
+import strategy_highest_outdegree
 from random import randrange
 # Thoughts to think about, should players be aware of the other's movement? 
 # Like think about the case where they can go to the same node but the distances are different
 class Game:
-    def __init__(self, num_nodes, num_players):
+    def __init__(self, num_nodes, num_players, strategies=None):
         self.num_nodes = num_nodes
         self.num_players = num_players
         # to use adj_mx[node 1][node 2] is 1 if path from node 1 to node 2
@@ -15,13 +17,13 @@ class Game:
         self.ownership = self.initialize_ownership()
         self.move_progress = np.zeros(num_players)
         self.move_goal = np.zeros(num_players)
-        self.player_strategies = self.initialize_player_strategies()
+        self.player_strategies = self.initialize_player_strategies(strategies)
 
     def initialize_adj_mx(self):
         arr = np.random.randint(1, 5, (self.num_nodes, self.num_nodes))
         arr += np.transpose(arr)
         np.fill_diagonal(arr, 0)
-        print(arr)
+        # print(arr)
         return arr
         # return np.ones((self.num_nodes, self.num_nodes)) - np.identity(self.num_nodes)
 
@@ -37,12 +39,29 @@ class Game:
                     self.player_locations[i] = index
         return ownership
 
-    def initialize_player_strategies(self):
+    def initialize_player_strategies(self, player_strategies):
         strategies = []
-        for i in range(self.num_players):
-            strategies.append(strategy_one.StrategyOne(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
-            self.move_goal[i] = strategies[i].peek_move()
-            self.move_progress[i] = self.adj_mx[int(self.player_locations[i])][int(self.move_goal[i])]
+        if player_strategies is not None and len(player_strategies) == self.num_players:
+            for i in range(0, self.num_players):
+                if player_strategies[i] == 1:
+                    print("short")
+                    strategies.append(strategy_shortest_dist.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
+
+                elif player_strategies[i] == 2:
+                    print("outdegree")
+                    strategies.append(strategy_highest_outdegree.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
+
+                else:
+                    print("random")
+                    strategies.append(strategy_random.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
+                self.move_goal[i] = strategies[i].peek_move()
+                self.move_progress[i] = self.adj_mx[int(self.player_locations[i])][int(self.move_goal[i])]
+        else:
+            for i in range(0, self.num_players):
+                print("random")
+                strategies.append(strategy_random.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
+                self.move_goal[i] = strategies[i].peek_move()
+                self.move_progress[i] = self.adj_mx[int(self.player_locations[i])][int(self.move_goal[i])]
         return strategies
 
     def game_over(self):
