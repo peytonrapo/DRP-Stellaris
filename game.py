@@ -6,12 +6,15 @@ from random import randrange
 # Thoughts to think about, should players be aware of the other's movement? 
 # Like think about the case where they can go to the same node but the distances are different
 class Game:
-    def __init__(self, num_nodes, num_players, strategies=None):
+    def __init__(self, num_nodes, num_players, strategies=None, adj_mx =None):
         self.num_nodes = num_nodes
         self.num_players = num_players
         # to use adj_mx[node 1][node 2] is 1 if path from node 1 to node 2
         # for now create a graph of all ones TODO replace with random graph generator
-        self.adj_mx = self.initialize_adj_mx()
+        if adj_mx is not None:
+            self.adj_mx = adj_mx
+        else:
+            self.adj_mx = self.initialize_adj_mx()
         # ownership[node] gives you the player number of owner
         self.player_locations = np.zeros(num_players)
         self.ownership = self.initialize_ownership()
@@ -44,21 +47,21 @@ class Game:
         if player_strategies is not None and len(player_strategies) == self.num_players:
             for i in range(0, self.num_players):
                 if player_strategies[i] == 1:
-                    print("short")
+                    # print("short")
                     strategies.append(strategy_shortest_dist.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
 
                 elif player_strategies[i] == 2:
-                    print("outdegree")
+                    # print("outdegree")
                     strategies.append(strategy_highest_outdegree.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
 
                 else:
-                    print("random")
+                    # print("random")
                     strategies.append(strategy_random.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
                 self.move_goal[i] = strategies[i].peek_move()
                 self.move_progress[i] = self.adj_mx[int(self.player_locations[i])][int(self.move_goal[i])]
         else:
             for i in range(0, self.num_players):
-                print("random")
+                # print("random")
                 strategies.append(strategy_random.Strategy(i, self.adj_mx, self.ownership, np.where(self.ownership == i)[0][0], self.num_nodes))
                 self.move_goal[i] = strategies[i].peek_move()
                 self.move_progress[i] = self.adj_mx[int(self.player_locations[i])][int(self.move_goal[i])]
@@ -67,7 +70,9 @@ class Game:
     def game_over(self):
         return -1 not in self.ownership
 
+    # return true if game state changed
     def tick(self):
+        change = False
         # For each player see if the player is at its destination, if so claim that node and then update
         # everyone's strategies, if not at destination but still at end go to next node on path and update move_progress.
         # Then decrease that persons' move_progress by 1
@@ -76,11 +81,13 @@ class Game:
             # print(self.ownership)
             # print(self.player_locations)
             if self.move_progress[i] == 0:
+                change = True
                 move = self.player_strategies[i].get_move()
                 self.player_locations[i] = move
                 # if no more nodes, claim the node moved to
                 if (not self.player_strategies[i].has_move()):
                     if self.claim_node(move, i):
+                        change = True
                         self.calculate_scores()
                         for j in range(self.num_players):
                             if self.player_strategies[j].update(self.ownership, self.player_locations[j]):
@@ -96,6 +103,7 @@ class Game:
                     self.move_goal[i] = self.player_strategies[i].peek_move()
                     self.move_progress[i] = self.adj_mx[int(move)][int(self.move_goal[i])]
             self.move_progress[i] -= 1
+        return change
 
     def claim_node(self, node, player):
         if node < len(self.ownership) and self.ownership[node] == -1:

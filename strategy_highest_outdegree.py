@@ -93,6 +93,7 @@ class Strategy:
         for i in range(self.num_nodes):
             if self.adj_mx[node][i] > 0 and ownership[i] == -1:
                 total += 1
+        # print(total)
         return total
 
 
