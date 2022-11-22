@@ -8,9 +8,8 @@ import networkx as nx
 
 num_nodes = 200
 num_players = 3
-strategies = [0, 0, 0]
-draw = False
-
+strategies = [1, 1, 1]
+draw = True
 
 def generate_adj_mx(num_nodes):
     max_dist = 5
@@ -90,7 +89,7 @@ while (not g.game_over()):
         if draw:
             nx.draw_networkx(G, pos=nx.spring_layout(G, pos=pos), node_size=node_size, node_color=g.ownership, width=width,labels=get_labels(g.player_locations), edge_color = get_edge_colors(G, g.player_locations, g.player_strategies))
             plt.show(block=False)
-            plt.pause(0.000001)
+            plt.pause(0.00000001)
             plt.clf()
 g.calculate_scores()
 end = time.perf_counter()
