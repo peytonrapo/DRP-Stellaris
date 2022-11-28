@@ -74,24 +74,24 @@ class Strategy:
 
     def get_goal_node(self, ownership, distances):
         index_goal = -1
-        max_degree = -1
+        max_num_opponents = -1
         for i in range(len(distances)):
             if ownership[i] == -1 and distances[i] != np.inf:
-                out_degree = self.get_out_degree(ownership, i)
-                if index_goal == -1 and out_degree >= max_degree:
-                    if out_degree == max_degree:
+                num_adj_opponents = self.get_num_adj_opponents(ownership, i)
+                if index_goal == -1 or num_adj_opponents >= max_num_opponents:
+                    if num_adj_opponents == max_num_opponents:
                         if distances[i] < distances[index_goal]:
                             index_goal = i
-                            max_degree = out_degree
+                            max_num_opponents = num_adj_opponents
                     else:
                         index_goal = i
-                        max_degree = out_degree
+                        max_num_opponents = num_adj_opponents
         return index_goal  
 
-    def get_out_degree(self, ownership, node):
+    def get_num_adj_opponents(self, ownership, node):
         total = 0
         for i in range(self.num_nodes):
-            if self.adj_mx[node][i] > 0 and ownership[i] == -1:
+            if self.adj_mx[node][i] > 0 and ownership[i] != -1 and ownership[i] != self.player:
                 total += 1
         # print(total)
         return total
