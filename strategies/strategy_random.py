@@ -21,7 +21,7 @@ class Strategy:
         return len(self.curr_path) > 0
 
     def peek_move(self):
-        if self.has_move:
+        if self.has_move():
             return self.curr_path[0]
         else:
             return -1
@@ -30,7 +30,7 @@ class Strategy:
         return self.curr_path.pop(0)
 
     def update(self, ownership, start_node):
-        update_path = False
+        update_path = False # is greedy so don't update by default
         for node in self.curr_path:
             if int(ownership[int(node)]) != self.player and int(ownership[int(node)]) != -1:
                 update_path = True
@@ -91,3 +91,6 @@ class Strategy:
             curr_node = from_node[int(curr_node)]
         path.reverse()
         return path
+
+    def __str__(self):
+        return "Random"

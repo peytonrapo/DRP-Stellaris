@@ -20,7 +20,7 @@ class Strategy:
         return len(self.curr_path) > 0
 
     def peek_move(self):
-        if self.has_move:
+        if self.has_move():
             return self.curr_path[0]
         else:
             return -1
@@ -29,10 +29,10 @@ class Strategy:
         return self.curr_path.pop(0)
 
     def update(self, ownership, start_node):
-        update_path = False
-        for node in self.curr_path:
-            if int(ownership[int(node)]) != self.player and int(ownership[int(node)]) != -1:
-                update_path = True
+        update_path = True # is reactionary so want to always update in response to others moves
+        # for node in self.curr_path:
+        #     if int(ownership[int(node)]) != self.player and int(ownership[int(node)]) != -1:
+        #         update_path = True
         if update_path or not self.has_move():
             self.update_curr_path(ownership, start_node)
             return True
@@ -75,17 +75,18 @@ class Strategy:
     def get_goal_node(self, ownership, distances):
         index_goal = -1
         max_num_opponents = -1
+        if len(self.curr_path) > 0 and ownership[self.curr_path[len(self.curr_path) - 1]] == -1:
+            index_goal = self.curr_path[len(self.curr_path) - 1] # current goal
         for i in range(len(distances)):
             if ownership[i] == -1 and distances[i] != np.inf:
                 num_adj_opponents = self.get_num_adj_opponents(ownership, i)
-                if index_goal == -1 or num_adj_opponents >= max_num_opponents:
-                    if num_adj_opponents == max_num_opponents:
-                        if distances[i] < distances[index_goal]:
-                            index_goal = i
-                            max_num_opponents = num_adj_opponents
-                    else:
+                if index_goal == -1:
+                    index_goal = i
+                    max_num_opponents = num_adj_opponents
+                elif num_adj_opponents >= max_num_opponents:
+                    if (num_adj_opponents == max_num_opponents and distances[i] < distances[index_goal]) or distances[i] < 2*distances[index_goal]: 
                         index_goal = i
-                        max_num_opponents = num_adj_opponents
+                        max_num_opponents = num_adj_opponents             
         return index_goal  
 
     def get_num_adj_opponents(self, ownership, node):
@@ -105,3 +106,6 @@ class Strategy:
             curr_node = from_node[int(curr_node)]
         path.reverse()
         return path
+
+    def __str__(self):
+        return "Most Opponents"

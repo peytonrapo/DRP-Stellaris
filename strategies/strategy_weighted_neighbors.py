@@ -74,25 +74,30 @@ class Strategy:
 
     def get_goal_node(self, ownership, distances):
         index_goal = -1
-        max_degree = -1
+        max_num_opponents = -1
+        if len(self.curr_path) > 0 and ownership[self.curr_path[len(self.curr_path) - 1]] == -1:
+            index_goal = self.curr_path[len(self.curr_path) - 1] # current goal
         for i in range(len(distances)):
             if ownership[i] == -1 and distances[i] != np.inf:
-                out_degree = self.get_out_degree(ownership, i)
-                if index_goal == -1 or out_degree >= max_degree:
-                    if out_degree == max_degree:
-                        if distances[i] < distances[index_goal]:
-                            index_goal = i
-                            max_degree = out_degree
-                    else:
+                num_adj_opponents = self.get_neighbors_weight(ownership, i)
+                if index_goal == -1:
+                    index_goal = i
+                    max_num_opponents = num_adj_opponents
+                elif num_adj_opponents >= max_num_opponents:
+                    if (num_adj_opponents == max_num_opponents and distances[i] < distances[index_goal]) or distances[i] < 2*distances[index_goal]: 
                         index_goal = i
-                        max_degree = out_degree
+                        max_num_opponents = num_adj_opponents             
         return index_goal  
 
-    def get_out_degree(self, ownership, node):
+    def get_neighbors_weight(self, ownership, node):
         total = 0
         for i in range(self.num_nodes):
-            if self.adj_mx[node][i] > 0 and ownership[i] == -1:
-                total += 1
+            if self.adj_mx[node][i] > 0 and ownership[i] != -1 and ownership[i] != self.player:
+                total += 0
+            elif self.adj_mx[node][i] > 0 and ownership[i] != -1 and ownership[i] == self.player:
+                total -= 0 # flexible
+            elif self.adj_mx[node][i] > 0 and ownership[i] != -1:
+                total += 0#flexible
         # print(total)
         return total
 
@@ -107,4 +112,4 @@ class Strategy:
         return path
 
     def __str__(self):
-        return "Highest Outdegree"
+        return "Weighted Neighbors"

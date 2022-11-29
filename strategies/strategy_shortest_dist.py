@@ -20,7 +20,7 @@ class Strategy:
         return len(self.curr_path) > 0
 
     def peek_move(self):
-        if self.has_move:
+        if self.has_move():
             return self.curr_path[0]
         else:
             return -1
@@ -88,3 +88,6 @@ class Strategy:
             curr_node = from_node[int(curr_node)]
         path.reverse()
         return path
+
+    def __str__(self):
+        return "Shortest Distance"
