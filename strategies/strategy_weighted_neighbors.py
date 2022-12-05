@@ -93,11 +93,11 @@ class Strategy:
         total = 0
         for i in range(self.num_nodes):
             if self.adj_mx[node][i] > 0 and ownership[i] != -1 and ownership[i] != self.player:
-                total += 0
+                total += 3 # per opponent claimed nodes
             elif self.adj_mx[node][i] > 0 and ownership[i] != -1 and ownership[i] == self.player:
-                total -= 0 # flexible
+                total -= 0 # per player claimed nodes
             elif self.adj_mx[node][i] > 0 and ownership[i] != -1:
-                total += 0#flexible
+                total += 1 # per unclaimed node
         # print(total)
         return total
 

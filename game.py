@@ -116,15 +116,17 @@ class Game:
         else:
             return False
 
-    def calculate_scores(self):
-        print("Scores: ")
+    def calculate_scores(self, print_results = False):
+        if print_results:
+            print("Scores: ")
         scores = np.zeros(self.num_players)
         for i in range(self.num_players):
             score = 0
             for node in self.ownership:
                 if node == i:
                     score += 1
-            print("  Player " + str(i) + "'s score: " + str(score)  + " Strategy " + str(self.player_strategies[i]))
+            if print_results:
+                print("  Player " + str(i) + "'s score: " + str(score)  + " Strategy " + str(self.player_strategies[i]))
             scores[i] = score
         return scores
 
